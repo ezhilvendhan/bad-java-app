@@ -1,24 +1,27 @@
 name: Semgrep
-
 on:
+  workflow_dispatch: {}
   pull_request: {}
   push:
     branches:
       - main
       - master
+    paths:
+      - .github/workflows/semgrep.yml
   schedule:
-    - cron: '0 0 * * 0' # Adjust this cron schedule as needed
-  workflow_dispatch: {}
-
+    # random HH:MM to avoid a load spike on GitHub Actions at 00:00
+    - cron: '22 21 * * *'
 jobs:
   semgrep:
-    name: Scan
-    runs-on: ubuntu-latest
+    name: semgrep/ci
+    runs-on: ubuntu-20.04
+    env:
+      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
     container:
-      image: returntocorp/semgrep
-
+      image: semgrep/semgrep
+    if: (github.actor != 'dependabot[bot]')
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Semgrep scan
         id: scan
@@ -26,7 +29,7 @@ jobs:
 
       - name: Upload results
         if: failure() && steps.scan.outcome == 'failure'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: result.sarif
           path: result.sarif
