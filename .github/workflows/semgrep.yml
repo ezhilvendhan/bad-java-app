@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-      SEMGREP_RULES: "p/default ev_personal_org/"
     container:
       image: semgrep/semgrep
     if: (github.actor != 'dependabot[bot]')
